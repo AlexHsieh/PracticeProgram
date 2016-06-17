@@ -18,11 +18,23 @@
 using namespace std;
 
 @interface MergeSort : NSObject
+@property (nonatomic) NSUInteger numberOfInversion;
 + (NSArray *)mergeSort:(NSArray *)arrayToSort;
 + (NSArray *)randomNumberArray:(NSUInteger)num;
+
 @end
 
 @implementation MergeSort
+
+static MergeSort *sharedInstance = nil;
+
++ (instancetype)sharedInstance {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedInstance = [[MergeSort alloc]init];
+    });
+    return sharedInstance;
+}
 
 + (NSArray *)randomNumberArray:(NSUInteger)num {
     NSMutableArray *arr = [NSMutableArray array];
@@ -32,14 +44,15 @@ using namespace std;
     return arr;
 }
 
-
 + (NSArray *)mergeSort:(NSArray *)arrayToSort {
     
     if (arrayToSort.count == 1) {
         return arrayToSort;
     } else {
         NSArray *arr = [self dividedArrayIntoOneItemInEachArray:arrayToSort];
+        arrayToSort =nil;
         NSArray *combinedArr = [self combineAllArrayInArrays:arr];
+        NSLog(@"numberOfInversion = %ld",[MergeSort sharedInstance].numberOfInversion);
         return combinedArr[0];
     }
     
@@ -60,15 +73,17 @@ using namespace std;
     while (combinedArr.count != 1) {
         log++;
 //        NSLog(@"log:%d",log);
-        NSArray *cArr = @[];
-        for (int i = 0; i<=combinedArr.count-2; i=i+2) {
-            cArr = [cArr arrayByAddingObject:[self compareAndCombineArray:combinedArr[i] andArray:combinedArr[i+1]]];
+        @autoreleasepool {
+            NSArray *cArr = @[];
+            for (int i = 0; i<=combinedArr.count-2; i=i+2) {
+                cArr = [cArr arrayByAddingObject:[self compareAndCombineArray:combinedArr[i] andArray:combinedArr[i+1]]];
+            }
+            if (combinedArr.count%2 == 1 ) {
+                cArr = [cArr arrayByAddingObject:combinedArr.lastObject];
+            }
+            
+            combinedArr = cArr;
         }
-        if (combinedArr.count%2 == 1 ) {
-            cArr = [cArr arrayByAddingObject:combinedArr.lastObject];
-        }
-        
-        combinedArr = cArr;
     }
     return combinedArr;
 }
@@ -77,6 +92,7 @@ using namespace std;
     NSMutableArray *combinedArr = [NSMutableArray array];
     int k = 0,i = 0,j = 0;
     for (k = 0; k < arr1.count+arr2.count; k++) {
+        
         if (i < arr1.count && j < arr2.count) {
             if ([arr1[i] integerValue] < [arr2[j] integerValue]) {
                 [combinedArr addObject:arr1[i]];
@@ -84,6 +100,7 @@ using namespace std;
             } else {
                 [combinedArr addObject:arr2[j]];
                 j++;
+                [MergeSort sharedInstance].numberOfInversion = [MergeSort sharedInstance].numberOfInversion + (arr1.count - i);
             }
         } else {
             if (i < arr1.count) {
@@ -94,6 +111,7 @@ using namespace std;
                 j++;
             }
         }
+        
     }
     return combinedArr;
 }
@@ -138,7 +156,7 @@ vector<int> compareAndMergeArray(vector<int> &A, vector<int> &B) {
     vector<int> C(A.size()+B.size()) ;
     
     while (indexA < A.size() && indexB < B.size()) {
-        cout << "A:" << A[indexA] << ", " << "B:" << B[indexB] << endl;
+//        cout << "A:" << A[indexA] << ", " << "B:" << B[indexB] << endl;
         if (A[indexA] < B[indexB]) {
             C[indexC] = A[indexA];
             indexA++;
@@ -151,16 +169,13 @@ vector<int> compareAndMergeArray(vector<int> &A, vector<int> &B) {
         }
     }
     
-    NSLog(@"inversion count = %ld",inversionCount);
-    
-    
     while (indexA < A.size()) {
         C[indexC] = A[indexA];
         indexA++;
         indexC++;
     }
     while (indexB < B.size()) {
-        C[indexC] = B[indexA];
+        C[indexC] = B[indexB];
         indexB++;
         indexC++;
     }
@@ -176,7 +191,6 @@ vector<int> combineAllArrayInArray(vector<vector<int>> &A) {
 //        cout << "log: " << log << endl;
         unsigned long cArrSize = combinedArr.size()%2 == 1 ? combinedArr.size()/2+1 : combinedArr.size()/2;
         std::vector<vector<int>> cArr(cArrSize);
-//        cout << "cArr size: " << cArrSize << endl;
         for (int i = 0; i<=combinedArr.size()-2; i=i+2) {
             std::vector<int> a = compareAndMergeArray(combinedArr[i],combinedArr[i+1]);
             cArr[i/2] = a;
@@ -214,7 +228,12 @@ vector<int> randomNumArr(int a) {
 
 vector<int> readfile(int numberOfItem) {
     
-    std::ifstream infile("/Users/alexhsieh/Documents/PracticeProgram/Design and Analysis, Part 1/merge sort/MergeSort/xx.txt");
+    std::ifstream infile;
+    if (numberOfItem == 6) {
+        infile.open("/Users/alexhsieh/Documents/PracticeProgram/Design and Analysis, Part 1/merge sort/MergeSort/xx.txt");
+    } else {
+        infile.open("/Users/alexhsieh/Documents/PracticeProgram/Design and Analysis, Part 1/merge sort/MergeSort/data.txt");
+    }
     std::string line;
     if (!infile) { NSLog(@"no file, return");}
 
@@ -227,10 +246,9 @@ vector<int> readfile(int numberOfItem) {
         int aNumber;
         if (!(iss >> aNumber)) { break; } // error
         arr[i] = aNumber;
-        cout << "arr["<< i << "]:" << arr[i] << endl;
+        if (numberOfItem < 50){cout << "arr["<< i << "]:" << arr[i] << endl;}
         i++;
     }
-    cout << "file array:" << &arr << endl;
     
     return arr;
 };
@@ -263,15 +281,19 @@ int main(int argc, const char * argv[]) {
         
 
         //user input
-        NSLog(@"Do the Merge sort of this array, (Sorted Result won't print when N > 50)");
+        NSLog(@"Do the Merge sort of this array");
         
         //C++ merge sort
         NSDate *startTime = [NSDate date];
         vector<int> sortedArrUseC = mergesort(myArray);
         NSLog(@"C++ sorting time = %f",[[NSDate date] timeIntervalSinceDate:startTime]);
         if(mergeSize<=50) cout << "C++ original array count =" << myArray.size() << ", array =" << &myArray << endl;
-        if(mergeSize<=50) cout << "C++ sorted array count =" << sortedArrUseC.size() << ", sorted array =" << &sortedArrUseC << endl;
-
+        if(mergeSize<=50) {
+            cout << "C++ sorted array count =" << sortedArrUseC.size() << ", sorted array =" << &sortedArrUseC << endl;
+        } else {
+            long int size = sortedArrUseC.size();
+            NSLog(@"sorted array count = %ld, sorted array = [%d,%d,...,%d,%d]",size,sortedArrUseC[0],sortedArrUseC[1],sortedArrUseC[size-2],sortedArrUseC[size-1]);
+        }
         
         
         NSMutableArray *mutArr = [NSMutableArray array];
@@ -284,7 +306,11 @@ int main(int argc, const char * argv[]) {
         NSArray *sortedArr = [MergeSort mergeSort:arr];
         NSLog(@"objective-C sorting time = %f",[[NSDate date] timeIntervalSinceDate:startTime]);
         if(mergeSize<=50) NSLog(@"original array count = %ld, array = %@",arr.count,arr);
-        if(mergeSize<=50) NSLog(@"sorted array count = %ld, sorted array = %@",sortedArr.count,sortedArr);
+        if(mergeSize<=50) {
+            NSLog(@"sorted array count = %ld, sorted array = %@",sortedArr.count,sortedArr);
+        } else {
+            NSLog(@"sorted array count = %ld, sorted array = [%@,%@,...,%@,%@]",sortedArr.count,sortedArr[0],sortedArr[1],sortedArr[sortedArr.count-2],sortedArr.lastObject);
+        }
         
         
         
@@ -298,7 +324,11 @@ int main(int argc, const char * argv[]) {
             }
         }];
         NSLog(@"cocoa sorting time = %f",[[NSDate date] timeIntervalSinceDate:cocoaStartTime]);
-        if(mergeSize<=50) NSLog(@"cocoa sorted array count = %ld, sorted array = %@",cocoaSortedArr.count,cocoaSortedArr);
+        if(mergeSize<=50) {
+            NSLog(@"cocoa sorted array count = %ld, sorted array = %@",cocoaSortedArr.count,cocoaSortedArr);
+        } else {
+            NSLog(@"sorted array count = %ld, sorted array = [%@,%@,...,%@,%@]",cocoaSortedArr.count,cocoaSortedArr[0],cocoaSortedArr[1],cocoaSortedArr[sortedArr.count-2],cocoaSortedArr.lastObject);
+        }
 
     }
     return 0;
