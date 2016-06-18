@@ -1,44 +1,7 @@
 Merge Sort
 
-I implemented merge use C++ and objective-c. compared it with internal Cocoa sorting method with same number of random integer N. For big N, C++ has advantage over Objective-c
-============================
+I implemented merge sort use C++ and objective-c. compared it with iOS SDK Cocoa sorting method with same number of random integer N. For big N, C++ has huge advantage over Objective-c. Internal iOS SDK has very good performance. 
 
-N:100
-2016-03-09 09:25:29.085 MergeSort[1005:21086] C++ sorting time = 0.000418
-2016-03-09 09:25:29.087 MergeSort[1005:21086] objective-C sorting time = 0.000626
-2016-03-09 09:25:29.087 MergeSort[1005:21086] cocoa sorting time = 0.000192
+Merge sort at the same time will caculate inversion in random number array. It will print the number of inversions
 
-N:200
-2016-03-09 09:25:53.097 MergeSort[1011:21308] C++ sorting time = 0.000769
-2016-03-09 09:25:53.100 MergeSort[1011:21308] objective-C sorting time = 0.001764
-2016-03-09 09:25:53.101 MergeSort[1011:21308] cocoa sorting time = 0.000264
-
-N:400
-2016-03-09 09:26:18.918 MergeSort[1029:22123] C++ sorting time = 0.001590
-2016-03-09 09:26:18.922 MergeSort[1029:22123] objective-C sorting time = 0.002602
-2016-03-09 09:26:18.922 MergeSort[1029:22123] cocoa sorting time = 0.000449
-
-N:800
-2016-03-09 09:27:05.657 MergeSort[1037:22429] C++ sorting time = 0.004166
-2016-03-09 09:27:05.663 MergeSort[1037:22429] objective-C sorting time = 0.005709
-2016-03-09 09:27:05.664 MergeSort[1037:22429] cocoa sorting time = 0.000934
-
-N:1600
-2016-03-09 09:27:26.006 MergeSort[1044:22620] C++ sorting time = 0.006162
-2016-03-09 09:27:26.023 MergeSort[1044:22620] objective-C sorting time = 0.016579
-2016-03-09 09:27:26.025 MergeSort[1044:22620] cocoa sorting time = 0.001816
-
-N:3200
-2016-03-09 09:27:51.417 MergeSort[1055:22901] C++ sorting time = 0.009481
-2016-03-09 09:27:51.470 MergeSort[1055:22901] objective-C sorting time = 0.052307
-2016-03-09 09:27:51.473 MergeSort[1055:22901] cocoa sorting time = 0.002630
-
-N:6400
-2016-03-09 09:28:53.023 MergeSort[1065:23310] C++ sorting time = 0.020227
-2016-03-09 09:28:53.197 MergeSort[1065:23310] objective-C sorting time = 0.173383
-2016-03-09 09:28:53.203 MergeSort[1065:23310] cocoa sorting time = 0.005268
-
-N:12800
-2016-03-09 09:29:22.142 MergeSort[1073:23633] C++ sorting time = 0.031688
-2016-03-09 09:29:22.793 MergeSort[1073:23633] objective-C sorting time = 0.648803
-2016-03-09 09:29:22.804 MergeSort[1073:23633] cocoa sorting time = 0.011012
+This project is developed under xCode v7.3.1
