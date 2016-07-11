@@ -21,7 +21,6 @@ using namespace std;
 
 unsigned long int numberOfComparision = 0;
 
-
 vector<int> quicksort (vector<int> &A , int pivot)
 {
     if (A.size() == 1 || A.size() == 0) {
@@ -116,6 +115,90 @@ vector<int> quicksort (vector<int> &A , int pivot)
     return A;
 }
 
+//sort vector between locStart to locEnd
+void quicksort_p (vector<int> *B , int locStart, int locEnd, int pivot)
+{
+    int sortSize = locEnd - locStart + 1;
+    if (sortSize <= 1 ) {
+        return;
+    }
+    int pivotValue = 0;
+    if (pivot == 1) {
+        pivotValue = (*B)[locStart];
+        
+    } else if(pivot == 2) {
+        pivotValue = (*B)[locEnd];
+        
+        //switch first value and the last value
+        int value0 = (*B)[locStart];
+        (*B)[locStart] = pivotValue;
+        (*B)[locEnd] = value0;
+        
+    } else {
+        int first = (*B)[locStart];
+        int last = (*B)[locEnd];
+        int median = 0;
+        if (B->size()%2) {
+            //odd
+            median = (*B)[sortSize*0.5 + locStart];
+        } else {
+            //even
+            median = (*B)[sortSize*0.5-1 + locStart];
+        }
+        int pivotIndex = locStart;
+        if ((first > last && first < median) || (first < last && first > median)) {
+            pivotValue = first;
+            pivotIndex = locStart;
+        } else if ((last > first && last < median) || (last < first && last > median) ) {
+            pivotValue = last;
+            pivotIndex = locEnd;
+        } else {
+            pivotValue = median;
+            pivotIndex = B->size()%2 ? (sortSize*0.5 + locStart) : (sortSize*0.5-1 + locStart);
+        }
+        
+        int value0 = (*B)[locStart];
+        (*B)[locStart] = pivotValue;
+        (*B)[pivotIndex] = value0;
+    }
+    
+    
+    numberOfComparision = numberOfComparision + sortSize-1;
+    //sort
+    int i = locStart+1;
+    for (int j=locStart+1; j<locStart+sortSize; j++) {
+        if ((*B)[j]>pivotValue) {
+            //do nothing
+        } else {
+            if (i != j) {
+                int valueJ = (*B)[j];
+                int valueI = (*B)[i];
+                (*B)[i] = valueJ;
+                (*B)[j] = valueI;
+            }
+            i++;
+        }
+    }
+    
+    //switch pivot and the last element of smaller than pivot
+    int valueI = (*B)[i-1];
+    (*B)[locStart] = valueI;
+    (*B)[i-1] = pivotValue;
+    
+    //create 2 locStart * locEnd
+    int locStart_smallerThanPivot = locStart;
+    int locEnd_smallerThanPivot = i-2;
+
+    int locStart_largerThanPivot = i;
+    int locEnd_largerThanPivot = locEnd;
+    
+    //sort 2 array
+    quicksort_p(B, locStart_smallerThanPivot, locEnd_smallerThanPivot, pivot);
+    quicksort_p(B, locStart_largerThanPivot, locEnd_largerThanPivot, pivot);
+}
+
+
+
 #pragma mark - utility
 
 vector<int> randomNumArr(int a) {
@@ -134,22 +217,24 @@ vector<int> randomNumArr(int a) {
 }
 
 vector<int> readfile(int numberOfItem) {
-    
-    std::ifstream infile;
+    string filePath = "/Users/alexhsieh/Documents/PracticeProgram/Design and Analysis, Part 1/quick sort/";
+    ifstream infile;
     if (numberOfItem == 6) {
-        infile.open("/Users/alexhsieh/Documents/PracticeProgram/Design and Analysis, Part 1/quick sort/xx.txt");
+        filePath.append("xx.txt");
     } else {
-        infile.open("/Users/alexhsieh/Documents/PracticeProgram/Design and Analysis, Part 1/quick sort/data.txt");
+        filePath.append("data.txt");
     }
+    infile.open(filePath);
+    
     std::string line;
-    if (!infile) { NSLog(@"no file, return");}
+    if (!infile) { NSLog(@"no file");}
     
     vector<int> arr(numberOfItem);
     int i = 0;
     
-    while (std::getline(infile, line))
+    while (getline(infile, line))
     {
-        std::istringstream iss(line);
+        istringstream iss(line);
         int aNumber;
         if (!(iss >> aNumber)) { break; } // error
         arr[i] = aNumber;
@@ -190,22 +275,47 @@ int main(int argc, const char * argv[]) {
         int pivot = 0;
         scanf("%i", &pivot);
         
+        NSLog(@"2 Way to sort: 1.copy to sort 2.inner array sort :");
+        int sortMethod = 0;
+        scanf("%i", &sortMethod);
+        
         //quick sort
         NSDate *startTime = [NSDate date];
-        vector<int> sortedArrUseC = quicksort(myArray, pivot);
-        NSLog(@"C++ sorting time = %f",[[NSDate date] timeIntervalSinceDate:startTime]);
-        cout << "C++ number of comparision =" << numberOfComparision << endl;
-        if(mergeSize<=50) {
-            cout << "C++ sorted array count =" << sortedArrUseC.size() << ", sorted array =" << &sortedArrUseC << endl;
-            int i = 0;
-            while (i<sortedArrUseC.size())
-            {
-                cout << "arr["<< i << "]:" << sortedArrUseC[i] << endl;
-                i++;
+        if (sortMethod == 1) {
+            vector<int> sortedArrUseC = quicksort(myArray, pivot);
+            NSLog(@"C++ sorting time = %f",[[NSDate date] timeIntervalSinceDate:startTime]);
+            cout << "C++ number of comparision =" << numberOfComparision << endl;
+            if(mergeSize<=50) {
+                cout << "C++ sorted array count =" << sortedArrUseC.size() << ", sorted array =" << &sortedArrUseC << endl;
+                int i = 0;
+                while (i<sortedArrUseC.size())
+                {
+                    cout << "arr["<< i << "]:" << sortedArrUseC[i] << endl;
+                    i++;
+                }
+            } else {
+                long int size = sortedArrUseC.size();
+                NSLog(@"sorted array count = %ld, sorted array = [%d,%d,...,%d,%d]",size,sortedArrUseC[0],sortedArrUseC[1],sortedArrUseC[size-2],sortedArrUseC[size-1]);
             }
         } else {
-            long int size = sortedArrUseC.size();
-            NSLog(@"sorted array count = %ld, sorted array = [%d,%d,...,%d,%d]",size,sortedArrUseC[0],sortedArrUseC[1],sortedArrUseC[size-2],sortedArrUseC[size-1]);
+            quicksort_p(&myArray, 0, (int)myArray.size()-1 ,pivot);
+            
+            NSLog(@"C++ sorting time = %f",[[NSDate date] timeIntervalSinceDate:startTime]);
+            cout << "C++ number of comparision =" << numberOfComparision << endl;
+            if(mergeSize<=50) {
+                cout << "C++ sorted array count =" << myArray.size() << ", sorted array =" << &myArray << endl;
+                int i = 0;
+                while (i<myArray.size())
+                {
+                    cout << "arr["<< i << "]:" << myArray[i] << endl;
+                    i++;
+                }
+                
+            } else {
+                long int size = myArray.size();
+                NSLog(@"sorted array count = %ld, sorted array = [%d,%d,...,%d,%d]",size,myArray[0],myArray[1],myArray[size-2],myArray[size-1]);
+            }
+            
         }
         
     }
