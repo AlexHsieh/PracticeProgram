@@ -149,9 +149,9 @@ void dfs_operation (directed_graph *graph) {
         int numberOfConnectedComponents = 0;
         vertex *vertex = graph->finished1stPassVertexs[i];
         numberOfConnectedComponents = dfs(graph,vertex,numberOfConnectedComponents);
-        if (numberOfConnectedComponents > 0) {
-            std::cout << "leader: " << vertex->label << ", # of SSC:" << numberOfConnectedComponents << std::endl;
-        }
+//        if (numberOfConnectedComponents > 0) {
+//            std::cout << "leader: " << vertex->label << ", # of SSC:" << numberOfConnectedComponents << std::endl;
+//        }
     }
 }
 
@@ -235,7 +235,7 @@ void dfs_operation_by_stack (directed_graph *graph) {
             numberOfConnectedComponents = dfs_by_stack(graph,&stack,numberOfConnectedComponents);
         }
         if (numberOfConnectedComponents > 0) {
-            std::cout << "leader: " << rootVertex->label << ", # of SSC:" << numberOfConnectedComponents << std::endl;
+//            std::cout << "leader: " << rootVertex->label << ", # of SSC:" << numberOfConnectedComponents << std::endl;
             graph->sscVector.push_back(numberOfConnectedComponents);
         }
     }
@@ -360,6 +360,8 @@ void markAllVertextUnExplored(directed_graph *graph) {
 }
 
 
+
+
 int main(int argc, const char * argv[]) {
     
     std::cout << "----- Kosaraju's Strongly Connected Components Algorithm -----" << std::endl;
@@ -380,8 +382,6 @@ int main(int argc, const char * argv[]) {
     } else {
         std::cout << "stack approach" << std::endl;
         dfs_rev_operation_by_stack(&g);
-//        std::cout << "numberOfRevFinishTimeBetween0ToCurrentFinishTime : " <<numberOfRevFinishTimeBetween0ToCurrentFinishTime << std::endl;
-//        std::cout << "numberOfRevFinishTimeOutOfRange : " <<numberOfRevFinishTimeOutOfRange << std::endl;
         markAllVertextUnExplored(&g);
         dfs_operation_by_stack(&g);
     }
