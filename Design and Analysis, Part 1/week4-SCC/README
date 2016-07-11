@@ -1,0 +1,5 @@
+README
+
+This project implement Kosaraju's algorithm to caculate number of Strongly Connected Components in a graph.
+Both recrusive and stack approach are implemented. Unzip SCC to get huge data input, there are total 875714 nodes in SCC.txt
+Recrusive approach will crash in this case..
